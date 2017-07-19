@@ -1,9 +1,9 @@
 'use strict'
 const mosca = require('mosca');
-const pubsub = sails.config.pubsub;
 module.exports = function MqttServer(sails){
   return {
     initialize: function(cb){
+      const pubsub = sails.config.pubsub;
       sails.log.info('Mqtt Server Hook Loaded');
       const _username = sails.config.username;
       const _password = sails.config.password;
