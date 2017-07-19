@@ -1,18 +1,18 @@
 'use strict'
-const username = sails.config.username;
-const password = sails.config.password;
 const mosca = require('mosca');
 module.exports = function MqttServer(sails){
   return {
     initialize: function(cb){
       sails.log.info('Mqtt Server Hook Loaded');
+      const username = sails.config.username;
+      const password = sails.config.password;
       let me = this;
       let mqttServer = function(){
 
         let ascoltatore = {
           type: 'redis',
           redis: require('redis'),
-          db: 12,
+          db: 11,
           port: 6379,
           return_buffers: true, // to handle binary payloads
           host: "localhost"
