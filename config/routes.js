@@ -34,8 +34,9 @@ module.exports.routes = {
 
   '/': {
     view: 'homepage'
-  }
-
+  },
+  'GET /env' : 'Env.tempAndHumi',
+  'POST /msg' : 'Device.publishMsg'
   /***************************************************************************
   *                                                                          *
   * Custom routes here...                                                    *
