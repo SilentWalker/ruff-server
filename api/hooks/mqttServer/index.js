@@ -1,5 +1,6 @@
 'use strict'
 const mosca = require('mosca');
+const pubsub = sails.config.pubsub;
 module.exports = function MqttServer(sails){
   return {
     initialize: function(cb){
@@ -79,18 +80,18 @@ module.exports = function MqttServer(sails){
           sails.log.info(`MQTT : receive ${deviceId} offline event`);
         };
 
-        //msg send to device
-        // pubsub.on('msg', (deviceId, payload) => {
-        //   let message = {
-        //     topic : deviceId,
-        //     payload: payload,
-        //     qos : 1,
-        //     retain : false
-        //   };
-        //   server.publish(message, function(){
-        //     sails.log.info(`topic : ${message.topic}, payload : ${message.payload} published`)
-        //   })
-        // });
+        // msg send to device
+        pubsub.on('msg', (deviceId, payload) => {
+          let message = {
+            topic : deviceId,
+            payload: payload,
+            qos : 2,
+            retain : false
+          };
+          server.publish(message, function(){
+            sails.log.info(`topic : ${message.topic}, payload : ${message.payload} published`)
+          })
+        });
       }
       sails.after(['lifted'], function() {
         mqttServer();

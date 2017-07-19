@@ -26,10 +26,12 @@
  * For more information, check out:
  * http://sailsjs.org/#!/documentation/anatomy/myApp/config/local.js.html
  */
-
+const events = require('events');
+const eventEmitter = new events.EventEmitter();
 module.exports = {
   username : '',
-  password : ''
+  password : '',
+  pubsub : eventEmitter,
 
   /***************************************************************************
    * Your SSL certificate and key, if you want to be able to serve HTTP      *
@@ -62,7 +64,7 @@ module.exports = {
    * to 80 (http://) or 443 (https://) if you have an SSL certificate        *
    ***************************************************************************/
 
-  // port: process.env.PORT || 1337,
+   port: process.env.PORT || 1338,
 
   /***************************************************************************
    * The runtime "environment" of your Sails app is either typically         *
