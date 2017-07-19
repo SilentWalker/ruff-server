@@ -4,8 +4,8 @@ module.exports = function MqttServer(sails){
   return {
     initialize: function(cb){
       sails.log.info('Mqtt Server Hook Loaded');
-      const username = sails.config.username;
-      const password = sails.config.password;
+      const _username = sails.config.username;
+      const _password = sails.config.password;
       let me = this;
       let mqttServer = function(){
 
@@ -27,7 +27,7 @@ module.exports = function MqttServer(sails){
         };
 
         let authenticate = function(client, username, password, callback) {
-          let authorized = (username === username && password.toString() === password);
+          let authorized = (username === _username && password.toString() === _password);
           if (authorized) client.user = username;
           callback(null, authorized);
         }
@@ -47,13 +47,20 @@ module.exports = function MqttServer(sails){
 
         server.on('published', function(packet, client) {
           //sails.log.info('Published', packet.topic, packet.payload);
-          let payload = new Array;
-          try{
-            payload = packet.payload.toString().split('|');
-          }catch(e){
-            sails.log.error(e);
-          }
+          let payload = packet.payload;
           switch(packet.topic){
+            case 'temp' : 
+              sails.log.debug(`receive temp message , current temp is ${payload}`)
+              sails.services.redis.hset(client.id, 'temp', payload, (err, rs) => {
+                if(err) sails.log.error(err);
+              })
+              break;  
+            case 'humi' :
+              sails.log.debug(`receive humi message , current temp is ${payload}`)
+              sails.services.redis.hset(client.id, 'humi', payload, (err, rs) => {
+                if(err) sails.log.error(err);
+              })
+              break; 
             default : 
               sails.log.info(`Not Processed Event -> ${packet.topic}`);
           }
