@@ -66,11 +66,17 @@ module.exports = function MqttServer(sails) {
             break;
             case 'sound':
               sails.log.debug(`receive sound message`);
-              let currentTime = moment(new Date()).format('HH:mm:ss');
-              let timeArr = currentTime.split(':');
-              if(Number(timeArr[0]) >= 0 && Number(timeArr[0] <= 6)){
-                sails.log.debug('light up led');
-                pubsub.emit('msg', client.id, 'lightUp');
+              if(!me.lighted){
+                me.lighted = true;
+                let currentTime = moment(new Date()).format('HH:mm:ss');
+                let timeArr = currentTime.split(':');
+                if(Number(timeArr[0]) >= 0 && Number(timeArr[0] <= 6)){
+                  sails.log.debug('light up led');
+                  pubsub.emit('msg', client.id, 'lightUp');
+                  setTimeout(() => {
+                    me.lighted = false;
+                  }, 21020);
+                }
               }
             break;
             default:
