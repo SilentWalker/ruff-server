@@ -72,7 +72,7 @@ module.exports = function MqttServer(sails) {
                 let timeArr = currentTime.split(':');
                 if(Number(timeArr[0]) >= 0 && Number(timeArr[0] <= 6)){
                   sails.log.debug('light up led');
-                  openNightLight();
+                  openNightLight(client);
                   setTimeout(() => {
                     me.lighted = false;
                   }, 15100);
@@ -96,7 +96,7 @@ module.exports = function MqttServer(sails) {
         function offline(deviceId) {
           sails.log.info(`MQTT : receive ${deviceId} offline event`);
         };
-        function openNightLight(){
+        function openNightLight(client){
           for(let i = 0; i < 256; i++){
             setTimeout(function(){
               pubsub.emit('msg', client.id, `${i}|${i}|${i}`)
