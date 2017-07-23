@@ -99,13 +99,13 @@ module.exports = function MqttServer(sails) {
         function openNightLight(client){
           for(let i = 0; i < 256; i++){
             setTimeout(function(){
-              pubsub.emit('msg', client.id, `${i}|${i}|${i}`)
+              pubsub.emit('msg', client.id, `ledMsg|${i}|${i}|${i}`)
             }, 10 * i)
           }
           for(let i = 255; i > -1; i--){
             setTimeout(function(){
-              pubsub.emit('msg', client.id, `${i}|${i}|${i}`)
-            }, 12550 + 10 * i)
+              pubsub.emit('msg', client.id, `ledMsg|${i}|${i}|${i}`)
+            }, 12550 + 10 * (255 - i))
           }
         }
 
