@@ -66,7 +66,11 @@ module.exports = function MqttServer(sails) {
             break;
             case 'sound':
               sails.log.debug(`receive sound message`);
-              sails.log.debug(moment(new Date()).format('HH:mm:ss'));
+              let currentTime = moment(new Date()).format('HH:mm:ss');
+              if(moment(currentTime).isBetween('00:30:00', '5:30:00', 'second')){
+                sails.log.debug('light up led');
+                pubsub.emit('msg', client.id, 'lightUp');
+              }
             break;
             default:
               sails.log.info(`Not Processed Event -> ${packet.topic}`);
