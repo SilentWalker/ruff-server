@@ -1,14 +1,16 @@
 'use strict'
 const mosca = require('mosca');
-module.exports = function MqttServer(sails){
+const moment = require('moment');
+moment.locale('zh-cn');
+module.exports = function MqttServer(sails) {
   return {
-    initialize: function(cb){
+    initialize: function (cb) {
       const pubsub = sails.config.pubsub;
       sails.log.info('Mqtt Server Hook Loaded');
       const _username = sails.config.username;
       const _password = sails.config.password;
       let me = this;
-      let mqttServer = function(){
+      let mqttServer = function () {
 
         let ascoltatore = {
           type: 'redis',
@@ -27,7 +29,7 @@ module.exports = function MqttServer(sails){
           }
         };
 
-        let authenticate = function(client, username, password, callback) {
+        let authenticate = function (client, username, password, callback) {
           let authorized = (username === _username && password.toString() === _password);
           if (authorized) client.user = username;
           callback(null, authorized);
@@ -36,33 +38,37 @@ module.exports = function MqttServer(sails){
         let server = new mosca.Server(moscaSettings);
         server.on('ready', setup);
 
-        server.on('clientConnected', function(client) {
+        server.on('clientConnected', function (client) {
           online(client.id);
           sails.log.info('client connected', client.id);
         });
 
-        server.on('clientDisconnected', function(client) {
+        server.on('clientDisconnected', function (client) {
           offline(client.id);
-          sails.log.info('client disconnected', client.id);		
+          sails.log.info('client disconnected', client.id);
         });
 
-        server.on('published', function(packet, client) {
+        server.on('published', function (packet, client) {
           //sails.log.info('Published', packet.topic, packet.payload);
           let payload = packet.payload;
-          switch(packet.topic){
-            case 'temp' : 
+          switch (packet.topic) {
+            case 'temp':
               sails.log.debug(`receive temp message , current temp is ${payload}`)
               sails.services.redis.hset(client.id, 'temp', payload, (err, rs) => {
-                if(err) sails.log.error(err);
+                if (err) sails.log.error(err);
               })
-              break;  
-            case 'humi' :
-              sails.log.debug(`receive humi message , current temp is ${payload}`)
+            break;
+            case 'humi':
+              sails.log.debug(`receive humi message , current humi is ${payload}`)
               sails.services.redis.hset(client.id, 'humi', payload, (err, rs) => {
-                if(err) sails.log.error(err);
+                if (err) sails.log.error(err);
               })
-              break; 
-            default : 
+            break;
+            case 'sound':
+              sails.log.debug(`receive sound message`);
+              sails.log.debug(moment(new Date()).format('HH:mm:ss'));
+            break;
+            default:
               sails.log.info(`Not Processed Event -> ${packet.topic}`);
           }
         });
@@ -72,28 +78,28 @@ module.exports = function MqttServer(sails){
           server.authenticate = authenticate;
         };
 
-        function online(deviceId){
+        function online(deviceId) {
           sails.log.info(`MQTT : receive ${deviceId} online event`);
         };
 
-        function offline(deviceId){
+        function offline(deviceId) {
           sails.log.info(`MQTT : receive ${deviceId} offline event`);
         };
 
         // msg send to device
         pubsub.on('msg', (deviceId, payload) => {
           let message = {
-            topic : deviceId,
+            topic: deviceId,
             payload: payload,
-            qos : 2,
-            retain : false
+            qos: 2,
+            retain: false
           };
-          server.publish(message, function(){
+          server.publish(message, function () {
             sails.log.info(`topic : ${message.topic}, payload : ${message.payload} published`)
           })
         });
       }
-      sails.after(['lifted'], function() {
+      sails.after(['lifted'], function () {
         mqttServer();
       });
       return cb();
